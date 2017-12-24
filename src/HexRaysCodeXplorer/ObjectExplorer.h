@@ -62,7 +62,8 @@ void search_objects(bool bForce = true);
 
 template <class T> BOOL verify_32_t(ea_t ea_ptr, T &rvalue)
 {
-	if(getFlags(ea_ptr))
+	/* >=7.0 get_flags, getFlags */
+	if(get_flags(ea_ptr))
 	{
 		rvalue = (T) get_32bit(ea_ptr);
 		return TRUE;

@@ -394,7 +394,7 @@ static bool get_expr_name(citem_t *citem, qstring& rv)
 
 	// retrieve the name of the routine
 	char citem_name[MAXSTR] = {};
-	e->print1(citem_name, _countof(citem_name) - 1, NULL);
+	e->print1(citem_name, countof(citem_name) - 1, NULL);
 	rv = citem_name;
 	tag_remove(&rv);
 
@@ -705,7 +705,7 @@ int idaapi init(void)
 	qstring options = get_plugin_options(PLUGIN.wanted_name);
 	parse_plugin_options(options, dump_types, dump_ctrees, crypto_prefix);
 
-	for (unsigned i = 0; i < _countof(kActionDescs); ++i)
+	for (unsigned i = 0; i < countof(kActionDescs); ++i)
 		register_action(kActionDescs[i]);
 
 	install_hexrays_callback(callback, nullptr);

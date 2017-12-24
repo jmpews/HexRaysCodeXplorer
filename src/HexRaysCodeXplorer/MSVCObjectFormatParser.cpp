@@ -650,12 +650,12 @@ bool RTTI::processVftable(ea_t vft, ea_t col, vftable::vtinfo &vi)
 #endif
 
 static eaList colList;
-std::map<ea_t, vftable::vtinfo> rtti_vftables;
+std::map<ea_t, vftable::vtinfo> _rtti_vftables;
 
 static void freeWorkingData() {
 	RTTI::freeWorkingData();
 	colList.clear();
-	rtti_vftables.clear();
+	_rtti_vftables.clear();
 }
 
 
@@ -886,7 +886,7 @@ void idaapi scanSeg4Vftables(segment_t *seg, eaRefMap &colMap)
 			{
 				vftable::vtinfo vi;
 				if (RTTI::processVftable(vfptr, it->first, vi)) {
-					rtti_vftables[vfptr] = vi;
+					_rtti_vftables[vfptr] = vi;
 				}
 
 				it->second++, found++;

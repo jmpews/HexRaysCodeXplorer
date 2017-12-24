@@ -139,4 +139,10 @@ void idaapi setUnknown(ea_t ea, asize_t size);
 void MakeName(ea_t ea, const qstring& name, char * prefix = "", char * postfix = "");
 bool MakeArray(ea_t ea, size_t nitems);
 
+template < typename T, size_t N >
+size_t countof( T ( & arr )[ N ] )
+{
+    return std::extent< T[ N ] >::value;
+}
+
 #endif

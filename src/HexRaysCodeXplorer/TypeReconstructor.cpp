@@ -25,6 +25,7 @@
 
 #include "Common.h"
 #include "TypeReconstructor.h"
+#include "Utility.h"
 
 #include "Debug.h"
 
@@ -594,7 +595,7 @@ bool idaapi reconstruct_type_cb(void *ud)
 			type_builder_t type_bldr;
 			{
 				char highl_expr_name[MAXSTR] = {};
-				highl_expr->print1(highl_expr_name, _countof(highl_expr_name) - 1, NULL);
+				highl_expr->print1(highl_expr_name, countof(highl_expr_name) - 1, NULL);
 				qstring s{ highl_expr_name };
 				tag_remove(&s);
 				type_bldr.expression_to_match.insert(s);

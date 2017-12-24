@@ -139,7 +139,7 @@ void ctree_dumper_t::parse_ctree_item(citem_t *item, qstring& rv) const
 		rv.append(' ');
 		{
 			char lbuf[MAXSTR] = {};
-			e->print1(lbuf, _countof(lbuf) - 1, NULL);
+			e->print1(lbuf, countof(lbuf) - 1, NULL);
 			qstring qbuf(lbuf);
 			tag_remove(&qbuf);
 			rv += qbuf;
