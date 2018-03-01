@@ -9,11 +9,11 @@ _   _          ______                _____           _     __   __      _
                             |___/                                 |_|</pre>
 
 ## changelist:
-1. #### Add support ida7.0 for macOS
+1. #### Add support ida7.0/ida7.1 for macOS
 
    - target (need to  "brew install gcc@7",  import table "/usr/local/opt/gcc/lib/gcc/7/libstdc++.6.dylib")
 
-   ![ida7.0_mac_target](./img/ida7.0_mac_target.png)
+   ![ida7.0_mac_target](./img/ida7.1_mac_target.png)
 
 
    	- build method
@@ -35,12 +35,12 @@ _   _          ______                _____           _     __   __      _
       - build script
     
         ```shell
-        ida-cmake/build.py -i ~/Downloads/idasdk70 -t 7.0 --idaq-path "/Applications/IDA_Pro_7.0/ida.app/Contents/MacOS"
+        ida-cmake/build.py -i ~/Downloads/idasdk70 -t 7.1 --idaq-path "/Applications/IDA_Pro_7.1/ida.app/Contents/MacOS"
         ```
     
-      ​
+      
     
-    ​
+    
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![Code Climate](https://codeclimate.com/github/REhints/HexRaysCodeXplorer/badges/gpa.svg)](https://codeclimate.com/github/REhints/HexRaysCodeXplorer)
