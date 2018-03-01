@@ -29,6 +29,7 @@
 #include "CtreeExtractor.h"
 
 #include "Debug.h"
+#include "Utility.h"
 
 #if defined (__LINUX__) || defined (__MAC__)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -61,7 +62,15 @@ int idaapi obj_fint_t::visit_expr(cexpr_t *e)
 
 	// get the variable name
 	char expr_name[MAXSTR] = {};
-	e->print1(expr_name, MAXSTR - 1, NULL);
+
+#if IDA_SDK_VERSION >= 710
+	qstring exprName = qstring(expr_name, _countof(expr_name) - 1);
+	e->print1(&exprName, NULL);
+
+#else
+	e->print1(expr_name, _countof(expr_name) - 1, NULL);
+#endif
+
 	qstring s{expr_name};
 	tag_remove(&s);
 
@@ -83,7 +92,13 @@ int idaapi obj_fint_t::visit_expr(cexpr_t *e)
 				target_expr = target_expr->x;
 
 			if (target_expr->op == cot_var) {
-				target_expr->print1(expr_name, MAXSTR - 1, NULL);
+#if IDA_SDK_VERSION >= 710
+	qstring exprName(expr_name, _countof(expr_name) - 1);
+	target_expr->print1(&exprName, NULL);
+
+#else
+	target_expr->print1(expr_name, _countof(expr_name) - 1, NULL);
+#endif
 				s = expr_name;
 				tag_remove(&s);
 
@@ -136,8 +151,13 @@ bool idaapi find_var(void *ud)
 	{
 		cexpr_t *highl_expr = (cexpr_t *)highlight;
 
-		char expr_name[MAXSTR];
-		highlight->print1(expr_name, MAXSTR, NULL);
+		char expr_name[MAXSTR] = {};
+#if IDA_SDK_VERSION >= 710
+	qstring exprName = qstring(expr_name, _countof(expr_name) - 1);
+	highlight->print1(&exprName, NULL);
+#else
+	highlight->print1(expr_name, _countof(expr_name) - 1, NULL);
+#endif
 		qstring s{ expr_name };
 		tag_remove(&s);
 

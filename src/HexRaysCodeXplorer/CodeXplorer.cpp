@@ -394,7 +394,12 @@ static bool get_expr_name(citem_t *citem, qstring& rv)
 
 	// retrieve the name of the routine
 	char citem_name[MAXSTR] = {};
-	e->print1(citem_name, countof(citem_name) - 1, NULL);
+	#if IDA_SDK_VERSION >= 710
+		qstring vout(citem_name, _countof(citem_name) - 1);
+		e->print1(&vout, NULL);
+	#else
+		e->print1(citem_name, _countof(citem_name) - 1, NULL);
+	#endif
 	rv = citem_name;
 	tag_remove(&rv);
 
@@ -426,11 +431,10 @@ static bool idaapi decompile_func(vdui_t &vu)
 	while ((proc_name > citem_name) && (*(proc_name - 1) != '>'))  // WTF is going here?
 		proc_name--;
 
-	if (proc_name != citem_name) 
+	if (proc_name != citem_name)
 	{
-		func_t * func = get_func_by_name(proc_name);
-		if (func != NULL)
-			vdui_t * decompiled_window = open_pseudocode(func->start_ea, -1);
+		if (func_t* func = get_func_by_name(proc_name))
+			open_pseudocode(func->start_ea, -1);
 	}
 
 	return true;
@@ -577,7 +581,11 @@ static bool idaapi display_vtbl_objects(void *ud)
 
 //--------------------------------------------------------------------------
 // This callback handles various hexrays events.
-static int idaapi callback(void *, hexrays_event_t event, va_list va)
+#if IDA_SDK_VERSION >= 710
+	static ssize_t idaapi callback(void *, hexrays_event_t event, va_list va)
+#else
+	static int idaapi callback(void *, hexrays_event_t event, va_list va)
+#endif
 {
 	switch (event)
 	{
@@ -705,7 +713,7 @@ int idaapi init(void)
 	qstring options = get_plugin_options(PLUGIN.wanted_name);
 	parse_plugin_options(options, dump_types, dump_ctrees, crypto_prefix);
 
-	for (unsigned i = 0; i < countof(kActionDescs); ++i)
+	for (unsigned i = 0; i < _countof(kActionDescs); ++i)
 		register_action(kActionDescs[i]);
 
 	install_hexrays_callback(callback, nullptr);
@@ -716,8 +724,7 @@ int idaapi init(void)
 		auto_wait();
 
 		if (dump_types) {
-			qstring options_msg = "Dumping types\n";
-			logmsg(DEBUG, options_msg.c_str());
+			logmsg(DEBUG, "Dumping types\n");
 			extract_all_types(NULL);
 
 			int file_id = qcreate("codexplorer_types_done", 511);
