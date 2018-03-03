@@ -184,17 +184,14 @@ bool idaapi type_builder_t::check_helper(citem_t *parent, int &off, int &num)
 		if(!strcmp(get_ctype_name(expr_2->x->op), "helper"))
 		{
 			qstring expr;
-			{
+			#if IDA_SDK_VERSION >= 710
+				expr_2->x->print1(&expr, NULL);
+			#else
 				char buff[MAXSTR] = {};
-				#if IDA_SDK_VERSION >= 710
-					qstring s(buff, _countof(buff) - 1);
-					expr_2->x->print1(&s, NULL);
-				#else
-					expr_2->x->print1(buff, _countof(buff) - 1, NULL);
-				#endif
+				expr_2->x->print1(buff, _countof(buff) - 1, NULL);
 				expr = buff;
-				tag_remove(&expr);
-			}
+			#endif
+			tag_remove(&expr);
 
 			if(expr == "LOBYTE")
 			{
@@ -333,23 +330,22 @@ bool idaapi type_builder_t::check_ptr(cexpr_t *e, struct_filed &str_fld)
 			{
 				cexpr_t *expr_2 = (cexpr_t *)parent_i;
 
-				// get index_value
-				char buff[MAXSTR] = {};
+				// get index_value				
 				#if IDA_SDK_VERSION >= 710
-					qstring n = qstring(buff, _countof(buff) - 1);
-					expr_2->y->print1(&n, NULL);
+					qstring s;
+					expr_2->y->print1(&s, NULL);
 				#else
+					char buff[MAXSTR] = {};
 					expr_2->y->print1(buff, _countof(buff) - 1, NULL);
+					qstring s{ buff };
 				#endif
-				qstring s{ buff };
 				tag_remove(&s);
-				strncpy(buff, s.c_str(), _countof(buff) - 1);
 
 				int base = 10;
-				if (strncmp(buff, "0x", 2) == 0)
+				if (s.find("0x") == 0)
 					base = 16;
 
-				offset = strtol(buff, NULL, base);
+				offset = strtol(s.c_str(), NULL, base);
 
 				referInfo.update_offset(offset);
 			} else if(parent_i->is_expr() && (parent_i->op == cot_cast)) {
@@ -373,14 +369,14 @@ bool idaapi type_builder_t::check_ptr(cexpr_t *e, struct_filed &str_fld)
 				break;
 			} else if(parent_i->is_expr() && (parent_i->op == cot_asg)) {
 				if (((cexpr_t *)parent_i)->y == e) { //parents[parents.size() - i]) {
-					char expr_name[MAXSTR] = {};
 					#if IDA_SDK_VERSION >= 710
-						qstring exprName(expr_name, _countof(expr_name) - 1);
-						((cexpr_t *)parent_i)->x->print1(&exprName, NULL);
+						qstring s;
+						((cexpr_t *)parent_i)->x->print1(&s, NULL);
 					#else
+						char expr_name[MAXSTR] = {};
 						((cexpr_t *)parent_i)->x->print1(expr_name, _countof(expr_name) - 1, NULL);
+						qstring s{ expr_name };
 					#endif
-					qstring s{ expr_name };
 					tag_remove(&s);
 
 					char comment[258];
@@ -443,14 +439,14 @@ bool idaapi type_builder_t::check_idx(struct_filed &str_fld)
 				cexpr_t *expr_2 = (cexpr_t *)parent_2;
 
 				// get index_value
-				char buff[MAXSTR] = {};
 				#if IDA_SDK_VERSION >= 710
-					qstring n = qstring(buff, _countof(buff) - 1);
-					expr_2->y->print1(&n, NULL);
+					qstring s;
+					expr_2->y->print1(&s, NULL);
 				#else
+					char buff[MAXSTR] = {};
 					expr_2->y->print1(buff, _countof(buff) - 1, NULL);
-				#endif
-				qstring s{ buff };
+					qstring s{ buff };
+				#endif				
 				tag_remove(&s);
 				int num = atoi(s.c_str());
 
@@ -483,12 +479,13 @@ int idaapi type_builder_t::visit_expr(cexpr_t *e)
 		// get the variable name
 		char expr_name[MAXSTR] = {};
 		#if IDA_SDK_VERSION >= 710
-			qstring exprName = qstring(expr_name, _countof(expr_name) - 1);
-			e->print1(&exprName, NULL);
+			qstring s;
+			e->print1(&s, NULL);
 		#else
+			char expr_name[MAXSTR] = {};
 			e->print1(expr_name, _countof(expr_name) - 1, NULL);
+			qstring s{ expr_name };
 		#endif
-		qstring s{ expr_name };
 		tag_remove(&s);
 
 		// check for the target variable
@@ -619,14 +616,14 @@ bool idaapi reconstruct_type_cb(void *ud)
 			// initialize type rebuilder
 			type_builder_t type_bldr;
 			{
-				char highl_expr_name[MAXSTR] = {};
 				#if IDA_SDK_VERSION >= 710
-					qstring highlExprName = qstring(highl_expr_name, _countof(highl_expr_name) - 1);
-					highl_expr->print1(&highlExprName, NULL);
+					qstring s;
+					highl_expr->print1(&s, NULL);
 				#else
+					char highl_expr_name[MAXSTR] = {};
 					e->print1(expr_name, _countof(expr_name) - 1, NULL);
+					qstring s{ highl_expr_name };
 				#endif
-				qstring s{ highl_expr_name };
 				tag_remove(&s);
 				type_bldr.expression_to_match.insert(s);
 			}

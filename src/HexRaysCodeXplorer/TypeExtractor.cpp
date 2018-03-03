@@ -61,17 +61,14 @@ int idaapi obj_fint_t::visit_expr(cexpr_t *e)
 		return 0;
 
 	// get the variable name
-	char expr_name[MAXSTR] = {};
-
 #if IDA_SDK_VERSION >= 710
-	qstring exprName = qstring(expr_name, _countof(expr_name) - 1);
-	e->print1(&exprName, NULL);
-
+	qstring s;
+	e->print1(&s, NULL);
 #else
+	char expr_name[MAXSTR] = {};
 	e->print1(expr_name, _countof(expr_name) - 1, NULL);
-#endif
-
 	qstring s{expr_name};
+#endif
 	tag_remove(&s);
 
 	// check for the target variable
@@ -92,14 +89,13 @@ int idaapi obj_fint_t::visit_expr(cexpr_t *e)
 				target_expr = target_expr->x;
 
 			if (target_expr->op == cot_var) {
-#if IDA_SDK_VERSION >= 710
-	qstring exprName(expr_name, _countof(expr_name) - 1);
-	target_expr->print1(&exprName, NULL);
 
-#else
-	target_expr->print1(expr_name, _countof(expr_name) - 1, NULL);
-#endif
-				s = expr_name;
+				#if IDA_SDK_VERSION >= 710
+					target_expr->print1(&s, NULL);
+				#else
+					target_expr->print1(expr_name, _countof(expr_name) - 1, NULL);
+					s = expr_name;
+				#endif
 				tag_remove(&s);
 
 				var_name = s;
@@ -150,15 +146,14 @@ bool idaapi find_var(void *ud)
 	if (highlight->is_expr() && (highlight->op == cot_obj))
 	{
 		cexpr_t *highl_expr = (cexpr_t *)highlight;
-
+	#if IDA_SDK_VERSION >= 710
+		qstring s;
+		highlight->print1(&s, NULL);
+	#else
 		char expr_name[MAXSTR] = {};
-#if IDA_SDK_VERSION >= 710
-	qstring exprName = qstring(expr_name, _countof(expr_name) - 1);
-	highlight->print1(&exprName, NULL);
-#else
-	highlight->print1(expr_name, _countof(expr_name) - 1, NULL);
-#endif
+		highlight->print1(expr_name, _countof(expr_name) - 1, NULL);
 		qstring s{ expr_name };
+	#endif
 		tag_remove(&s);
 
 		// initialize type rebuilder

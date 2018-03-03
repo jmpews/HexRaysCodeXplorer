@@ -103,12 +103,12 @@ void callgraph_t::get_node_label(int n, qstring& rv) const
 			{
 				char lbuf[MAXSTR] = {};
 				#if IDA_SDK_VERSION >= 710
-					qstring n = qstring(lbuf, _countof(lbuf));
-					e->print1(&n, nullptr);
+					qstring qbuf;
+					e->print1(&qbuf, nullptr);
 				#else
 					e->print1(lbuf, _countof(lbuf), nullptr);
-				#endif
-				qstring qbuf(lbuf);
+					qstring qbuf(lbuf);
+				#endif				
 				tag_remove(&qbuf);
 				rv += qbuf;
 			}

@@ -140,12 +140,12 @@ void ctree_dumper_t::parse_ctree_item(citem_t *item, qstring& rv) const
 		{
 			char lbuf[MAXSTR] = {};
 			#if IDA_SDK_VERSION >= 710
-				qstring n = qstring(lbuf, _countof(lbuf) - 1);
-				e->print1(&n, NULL);
+				qstring qbuf;
+				e->print1(&qbuf, NULL);
 			#else
 				e->print1(lbuf, _countof(lbuf) - 1, NULL);
-			#endif
-			qstring qbuf(lbuf);
+				qstring qbuf(lbuf);
+			#endif			
 			tag_remove(&qbuf);
 			rv += qbuf;
 		}

@@ -392,15 +392,14 @@ static bool get_expr_name(citem_t *citem, qstring& rv)
 
 	cexpr_t *e = (cexpr_t *)citem;
 
-	// retrieve the name of the routine
-	char citem_name[MAXSTR] = {};
+	// retrieve the name of the routine	
 	#if IDA_SDK_VERSION >= 710
-		qstring vout(citem_name, _countof(citem_name) - 1);
-		e->print1(&vout, NULL);
+		e->print1(&rv, NULL);
 	#else
+		char citem_name[MAXSTR] = {};
 		e->print1(citem_name, _countof(citem_name) - 1, NULL);
+		rv = citem_name;
 	#endif
-	rv = citem_name;
 	tag_remove(&rv);
 
 	return true;
@@ -582,9 +581,9 @@ static bool idaapi display_vtbl_objects(void *ud)
 //--------------------------------------------------------------------------
 // This callback handles various hexrays events.
 #if IDA_SDK_VERSION >= 710
-	static ssize_t idaapi callback(void *, hexrays_event_t event, va_list va)
+	static ssize_t idaapi callback(void *ud, hexrays_event_t event, va_list va)
 #else
-	static int idaapi callback(void *, hexrays_event_t event, va_list va)
+	static int idaapi callback(void *ud, hexrays_event_t event, va_list va)
 #endif
 {
 	switch (event)
