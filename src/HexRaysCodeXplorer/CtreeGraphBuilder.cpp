@@ -101,14 +101,8 @@ void callgraph_t::get_node_label(int n, qstring& rv) const
 			// Display helper names and number values
 			rv.append(' ');
 			{
-				char lbuf[MAXSTR] = {};
-				#if IDA_SDK_VERSION >= 710
-					qstring qbuf;
-					e->print1(&qbuf, nullptr);
-				#else
-					e->print1(lbuf, _countof(lbuf), nullptr);
-					qstring qbuf(lbuf);
-				#endif				
+				qstring qbuf;
+				print1wrapper(e, &qbuf, nullptr);
 				tag_remove(&qbuf);
 				rv += qbuf;
 			}
