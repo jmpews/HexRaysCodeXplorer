@@ -27,6 +27,19 @@
 
 #pragma once
 
+#include <cstring>
+#include <cstdarg>
+#include <cstdint>
+
+#include <iterator>
+#include <string>
+#include <vector>
+#include <list>
+#include <set>
+#include <map>
+#include <iostream>
+#include <sstream>
+
 #if !defined (__LINUX__) && !defined (__MAC__)
 #pragma warning (disable: 4996 4800 )
 #else
@@ -112,18 +125,6 @@ void print1wrapper(const T *e, qstring *qbuf, const cfunc_t *func) {
 
 
 
-#include <cstring>
-#include <cstdarg>
-#include <cstdint>
-
-#include <iterator>
-#include <string>
-#include <vector>
-#include <list>
-#include <set>
-#include <map>
-#include <iostream>
-#include <sstream>
 
 #endif
 
