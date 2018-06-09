@@ -5,8 +5,12 @@ project(HexRaysCodeXplorer)
 
 include(cmake/IDA.cmake)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -static-libstdc++")
+
+# already fix Common.h wrong usage
+# add_definitions(-DUSE_DANGEROUS_FUNCTIONS=1)
+# add_definitions(-DUSE_STANDARD_FILE_FUNCTIONS=1)
 
 
 set(HexRaysCodeXplorer.path ./src/HexRaysCodeXplorer)

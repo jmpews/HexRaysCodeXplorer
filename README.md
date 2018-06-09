@@ -1,3 +1,18 @@
+#### macOS|x86_64
+**Build**
+
+```
+cmake .. -DIDA_INSTALL_DIR=/Applications/IDAPro7.0/ida.app/Contents/MacOS -DIDA_SDK_DIR=/Users/jmpews/Downloads/ida_plugin/idasdk70 -DIDA_BINARY_64=ON
+```
+
+**Install**
+
+copy to `plugins` directory
+
+---
+
+
+
 <pre>
  _   _          ______                _____           _     __   __      _                     
 | | | |         | ___ \              /  __ \         | |    \ \ / /     | |                    
