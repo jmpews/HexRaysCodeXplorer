@@ -327,8 +327,19 @@ void find_vtables()
 		while (ea_text <= seg->end_ea)
 			process_vtbl(ea_text);
 
-	} else {
-		logmsg(DEBUG, "search_objects() - .rdata does not exist\n");
+	} 
+	else if (segment_t *seg = get_segm_by_name("__const")) {
+		logmsg(DEBUG, "search_objects() - __const exist\n");
+
+		segSet.insert(seg);
+
+		ea_t ea_text = seg->start_ea;
+		while (ea_text <= seg->end_ea)
+			process_vtbl(ea_text);
+
+	}
+	else {
+		logmsg(DEBUG, "search_objects() - result does not exist\n");
 	}
 
 	// look also at .data section
@@ -346,6 +357,14 @@ void find_vtables()
 			if (get_segm_name(&segm_name, seg) > 0 && segm_name == ".data")
 			{
 				logmsg(DEBUG, "search_objects() - .data exist\n");
+				segSet.insert(seg);
+				ea_t ea_text = seg->start_ea;
+				while (ea_text <= seg->end_ea)
+					process_vtbl(ea_text);
+			}
+			else if (get_segm_name(&segm_name, seg) > 0 && segm_name == "__data")
+			{
+				logmsg(DEBUG, "search_objects() - __data exist\n");
 				segSet.insert(seg);
 				ea_t ea_text = seg->start_ea;
 				while (ea_text <= seg->end_ea)

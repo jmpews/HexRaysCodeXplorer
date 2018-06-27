@@ -14,7 +14,7 @@ copy to `plugins` directory
 
 
 <pre>
- _   _          ______                _____           _     __   __      _                     
+_   _          ______                _____           _     __   __      _
 | | | |         | ___ \              /  __ \         | |    \ \ / /     | |                    
 | |_| | _____  _| |_/ /__ _ _   _ ___| /  \/ ___   __| | ___ \ V / _ __ | | ___  _ __ ___ _ __ 
 |  _  |/ _ \ \/ /    // _` | | | / __| |    / _ \ / _` |/ _ \/   \| '_ \| |/ _ \| '__/ _ \ '__|
@@ -22,7 +22,40 @@ copy to `plugins` directory
 \_| |_/\___/_/\_\_| \_\__,_|\__, |___/\____/\___/ \__,_|\___\/   \/ .__/|_|\___/|_|  \___|_|   
                              __/ |                                | |                          
                             |___/                                 |_|</pre>
-============================================================================
+
+## changelist:
+1. #### Add support ida7.0/ida7.1 for macOS
+
+   - target (need to  "brew install gcc@7",  import table "/usr/local/opt/gcc/lib/gcc/7/libstdc++.6.dylib")
+
+   ![ida7.0_mac_target](./img/ida7.1_mac_target.png)
+
+
+   	- build method
+
+      - Install gcc (Xcode clang not support HexRaysCodeXplorer)
+
+        ```shell
+        brew install gcc@7
+        ```
+
+
+      - Close the comment  in CMakeLists.txt
+
+        ```cmake
+        SET(CMAKE_C_COMPILER "/usr/local/bin/gcc-7")
+        SET(CMAKE_CXX_COMPILER "/usr/local/bin/g++-7")
+        ```
+    
+      - build script
+    
+        ```shell
+        ida-cmake/build.py -i ~/Downloads/idasdk70 -t 7.1 --idaq-path "/Applications/IDA_Pro_7.1/ida.app/Contents/MacOS"
+        ```
+    
+      
+    
+    
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![Code Climate](https://codeclimate.com/github/REhints/HexRaysCodeXplorer/badges/gpa.svg)](https://codeclimate.com/github/REhints/HexRaysCodeXplorer)
@@ -69,7 +102,7 @@ Also CodeXplorer plugin supports auto REconstruction type into IDA local types s
 * ***Virtual function table identification***  - automatically identifies references to virtual function tables during type reconstruction. When a reference to a virtual function table is identified the plugin generates a corresponding C-structure. As shown below during reconstructing `struct_local_data_storage` two virtual function tables were identified and, as a result, two corresponding structures were generated: `struct_local_data_storage_VTABLE_0` and `struct_local_data_storage_VTABLE_4`.
 
 ![12](img/12.png)
-  
+
 * ***C-tree graph visualization*** – a special tree-like structure representing a decompiled routine in citem_t terms (hexrays.hpp). Useful feature for understanding how the decompiler works. The highlighted graph node corresponds to the current cursor position in the HexRays Pseudocode window:
 
 ![3](img/3.png)
@@ -131,7 +164,7 @@ __Compiling__:
 * cd src/HexRaysCodeExplorer/
 * IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> EA64=0 make -f makefile.lnx
 * IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> EA64=0 make -f makefile.lnx
-  
+
 ***Mac***:
 * cd src/HexRaysCodeExplorer/
 * IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> make -f makefile.mac

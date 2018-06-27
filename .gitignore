@@ -4,8 +4,8 @@
 *.o
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
+#*.so
+#*.dylib
 
 # Compiled Static libraries
 *.lai
@@ -15,3 +15,5 @@
 /src/.vs
 /src/*.db
 /src/*.opendb
+build-7.1-32/*
+build-7.1-64/*
