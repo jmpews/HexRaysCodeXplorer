@@ -1,24 +1,24 @@
 /*	Copyright (c) 2013-2015
 	REhints <info@rehints.com>
 	All rights reserved.
-	
+
 	==============================================================================
-	
+
 	This file is part of HexRaysCodeXplorer
 
- 	HexRaysCodeXplorer is free software: you can redistribute it and/or modify it
- 	under the terms of the GNU General Public License as published by
- 	the Free Software Foundation, either version 3 of the License, or
- 	(at your option) any later version.
+	HexRaysCodeXplorer is free software: you can redistribute it and/or modify it
+	under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
- 	This program is distributed in the hope that it will be useful, but
- 	WITHOUT ANY WARRANTY; without even the implied warranty of
- 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- 	General Public License for more details.
+	This program is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	General Public License for more details.
 
- 	You should have received a copy of the GNU General Public License
- 	along with this program.  If not, see
- 	<http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see
+	<http://www.gnu.org/licenses/>.
 
 	==============================================================================
 */
@@ -45,16 +45,17 @@
 bool idaapi ctree_dumper_t::filter_citem(citem_t *item) {
 	if (item->is_expr()) {
 		cexpr_t * expr = (cexpr_t *)item;
-		
+
 		if (item->op == cot_cast)
 			return true;
 		else if (item->op == cot_helper)
 			return true;
-		else if ((item->op >= cot_postinc) && (item->op <= cot_predec)) 
+		else if ((item->op >= cot_postinc) && (item->op <= cot_predec))
 			return true;
 		else if ((item->op >= cot_idx) && ((item->op <= cot_last)))
 			return true;
-	} else {
+	}
+	else {
 		if (item->op == cit_expr)
 			return true;
 	}
@@ -114,7 +115,7 @@ void ctree_dumper_t::parse_ctree_item(citem_t *item, qstring& rv) const
 		if (e->x->op == cot_obj) {
 			if (get_func_name(&func_name, e->x->obj_ea) == 0)
 				rv.cat_sprnt(" sub_%a", e->x->obj_ea);
-			else 
+			else
 				rv.cat_sprnt(" %s", func_name.c_str());
 		}
 		break;
@@ -159,7 +160,7 @@ void ctree_dumper_t::parse_ctree_item(citem_t *item, qstring& rv) const
 	// The second line of the node contains the item address
 	rv.cat_sprnt(";ea->%a", item->ea);
 
-	if ( item->is_expr() && !e->type.empty() )
+	if (item->is_expr() && !e->type.empty())
 	{
 		// For typed expressions, the third line will have
 		// the expression type in human readable form
@@ -174,10 +175,10 @@ void ctree_dumper_t::parse_ctree_item(citem_t *item, qstring& rv) const
 			rv.append('?');
 		}
 
-		if(e->type.is_ptr())
+		if (e->type.is_ptr())
 		{
 			tinfo_t ptr_rem = ::remove_pointer(e->type);
-			if(ptr_rem.is_struct())
+			if (ptr_rem.is_struct())
 			{
 				qstring typenm;
 				ptr_rem.print(&typenm, "prefix ", 0, 0, PRTYPE_MULTI | PRTYPE_TYPE | PRTYPE_SEMI);
@@ -234,7 +235,7 @@ void dump_ctrees_in_file(std::map<ea_t, ctree_dump_line> &data_to_dump, const qs
 	int file_id = create_open_file("ctrees.txt");
 	if (file_id == -1)
 	{
-		logmsg(ERROR, "Failed to open file for dumping ctress\r\n");
+		logmsg(DEBUG_LEVEL_ERROR, "Failed to open file for dumping ctress\r\n");
 		return;
 	}
 
@@ -246,14 +247,14 @@ void dump_ctrees_in_file(std::map<ea_t, ctree_dump_line> &data_to_dump, const qs
 		qstring sha_hash;
 		int err = get_hash_of_string(cdl.ctree_for_hash, sha_hash);
 		if (err != shaSuccess) {
-			logmsg(ERROR, "Error in computing SHA1 hash\r\n");
+			logmsg(DEBUG_LEVEL_ERROR, "Error in computing SHA1 hash\r\n");
 			continue;
 		}
 
 		qstring dump_line = sha_hash + ";";
 		err = get_hash_of_string(cdl.ctree_dump, sha_hash);
 		if (err != shaSuccess) {
-			logmsg(ERROR, "Error in computing SHA1 hash\r\n");
+			logmsg(DEBUG_LEVEL_ERROR, "Error in computing SHA1 hash\r\n");
 			continue;
 		}
 		dump_line += sha_hash + ";";
@@ -304,7 +305,7 @@ bool idaapi dump_funcs_ctree(void *ud, const qstring &crypto_prefix)
 	bool heuristic_flag;
 	size_t count = 0, heur_count = 0, crypto_count = 0;
 	size_t total_func_qty = get_func_qty();
-	for (size_t i = 0 ; i < total_func_qty ; i ++) {
+	for (size_t i = 0; i < total_func_qty; i++) {
 		heuristic_flag = 0;
 
 		func_t *function = getn_func(i);
@@ -312,13 +313,13 @@ bool idaapi dump_funcs_ctree(void *ud, const qstring &crypto_prefix)
 			bool crypto_flag = func_name_has_prefix(crypto_prefix, function->start_ea);
 
 			// skip libs that are not marked as crypto
-			if ( ((function->flags & FUNC_LIB) != 0) && !crypto_flag )
+			if (((function->flags & FUNC_LIB) != 0) && !crypto_flag)
 				continue;
 
 			// From this point on, we have a function outside of lib or a crypto one
 
 			// Ignore functions less than MIN_FUNC_SIZE_DUMP bytes
-			if ( ((function->end_ea - function->start_ea) < MIN_FUNC_SIZE_DUMP) && !crypto_flag )
+			if (((function->end_ea - function->start_ea) < MIN_FUNC_SIZE_DUMP) && !crypto_flag)
 				continue;
 
 			// If function is bigger than MIN_HEURISTIC_FUNC_SIZE_DUMP, mark as being triggered by the heuristic
@@ -393,9 +394,10 @@ bool idaapi extract_all_ctrees(void *ud)
 	if (!ask_str(&crypto_prefix, 0, "Enter prefix of crypto function names", va))
 		return false;
 
-	if(!crypto_prefix.empty()) {
+	if (!crypto_prefix.empty()) {
 		dump_funcs_ctree(NULL, crypto_prefix);
-	} else {
+	}
+	else {
 		warning("Incorrect prefix!!");
 	}
 
@@ -410,7 +412,7 @@ struct func_ctree_info_t
 	TWidget *cv;
 	TWidget *codeview;
 	strvec_t sv;
-	func_ctree_info_t(TWidget *f) : widget(f), cv(nullptr), codeview(nullptr){}
+	func_ctree_info_t(TWidget *f) : widget(f), cv(nullptr), codeview(nullptr) {}
 };
 
 

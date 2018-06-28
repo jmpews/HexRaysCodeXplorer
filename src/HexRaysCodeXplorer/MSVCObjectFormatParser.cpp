@@ -635,8 +635,8 @@ bool RTTI::processVftable(ea_t vft, ea_t col, vftable::vtinfo &vi)
 
 namespace {
 
-static eaList colList;
-static std::map<ea_t, vftable::vtinfo> rtti_vftables;
+	static eaList colList;
+	static std::map<ea_t, vftable::vtinfo> rtti_vftables;
 
 } // anonymous
 
@@ -733,7 +733,7 @@ bool getPlainTypeName(const qstring& mangled, qstring& outStr)
 		__unDName(outStr, mangled + 1, MAXSTR, malloc, free, (UNDNAME_32_BIT_DECODE | UNDNAME_TYPE_ONLY | UNDNAME_NO_ECSU));
 		if ((outStr[0] == 0) || (strcmp((mangled + 1), outStr) == 0))
 		{
-		logmsg(ERROR, "** getPlainClassName:__unDName() failed to unmangle! input: \"%s\"\n", mangled);
+		logmsg(DEBUG_LEVEL_ERROR, "** getPlainClassName:__unDName() failed to unmangle! input: \"%s\"\n", mangled);
 		return(FALSE);
 		}
 		*/

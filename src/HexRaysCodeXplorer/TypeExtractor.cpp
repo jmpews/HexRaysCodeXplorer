@@ -1,24 +1,24 @@
 /*	Copyright (c) 2013-2015
 	REhints <info@rehints.com>
 	All rights reserved.
-	
+
 	==============================================================================
-	
+
 	This file is part of HexRaysCodeXplorer
 
- 	HexRaysCodeXplorer is free software: you can redistribute it and/or modify it
- 	under the terms of the GNU General Public License as published by
- 	the Free Software Foundation, either version 3 of the License, or
- 	(at your option) any later version.
+	HexRaysCodeXplorer is free software: you can redistribute it and/or modify it
+	under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
- 	This program is distributed in the hope that it will be useful, but
- 	WITHOUT ANY WARRANTY; without even the implied warranty of
- 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- 	General Public License for more details.
+	This program is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	General Public License for more details.
 
- 	You should have received a copy of the GNU General Public License
- 	along with this program.  If not, see
- 	<http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see
+	<http://www.gnu.org/licenses/>.
 
 	==============================================================================
 */
@@ -152,7 +152,8 @@ bool idaapi find_var(void *ud)
 			reset_pointer_type(vu.cfunc, obj_find.var_name);
 
 			vu.refresh_ctext();
-		} else {
+		}
+		else {
 			warning("Failed to find variable...\n");
 			logmsg(DEBUG, "Failed to find variable...\n");
 		}
@@ -206,7 +207,7 @@ tid_t idaapi merge_types(const qvector<qstring>& types_to_merge, const qstring& 
 			continue;
 
 		// enumerate members
-		for ( ea_t offset = get_struc_first_offset(struc_type) ; offset != BADADDR ; offset = get_struc_next_offset(struc_type, offset)) {
+		for (ea_t offset = get_struc_first_offset(struc_type); offset != BADADDR; offset = get_struc_next_offset(struc_type, offset)) {
 			member_t * member_info = get_member(struc_type, offset);
 			if (!member_info)
 				continue;
@@ -241,7 +242,7 @@ void get_struct_key(struc_t * struc_type, const VTBL_info_t& vtbl_info, qstring 
 	qstring vtables_sub_key;
 	int vftbales_num = 0;
 	int members_count = 0;
-	for ( ea_t offset = get_struc_first_offset(struc_type) ; offset != BADADDR ; offset = get_struc_next_offset(struc_type, offset)) {
+	for (ea_t offset = get_struc_first_offset(struc_type); offset != BADADDR; offset = get_struc_next_offset(struc_type, offset)) {
 		member_t * member_info = get_member(struc_type, offset);
 		if (member_info != NULL) {
 			qstring member_name = get_member_name(member_info->id);
@@ -258,12 +259,12 @@ void get_struct_key(struc_t * struc_type, const VTBL_info_t& vtbl_info, qstring 
 					}
 				}
 
-				vftbales_num ++;
+				vftbales_num++;
 			}
 
 			sub_key.cat_sprnt("_%d", member_size);
 
-			members_count ++;
+			members_count++;
 		}
 	}
 	file_entry_key.sprnt("t_%d_%d", vtbl_info.methods, vftbales_num);
@@ -318,7 +319,7 @@ bool idaapi check_subtype(VTBL_info_t vtbl_info, qstring subtype_name) {
 		return false;
 
 	// enumerate members
-	for ( ea_t offset = get_struc_first_offset(struc_type) ; offset != BADADDR ; offset = get_struc_next_offset(struc_type, offset)) {
+	for (ea_t offset = get_struc_first_offset(struc_type); offset != BADADDR; offset = get_struc_next_offset(struc_type, offset)) {
 		member_t * member_info = get_member(struc_type, offset);
 		if (!member_info)
 			continue;
@@ -347,7 +348,7 @@ bool idaapi extract_all_types(void *ud)
 	int file_id = create_open_file("types.txt");
 	if (file_id == -1)
 	{
-		logmsg(ERROR, "Failed to open file for dumping types.txt\r\n");
+		logmsg(DEBUG_LEVEL_ERROR, "Failed to open file for dumping types.txt\r\n");
 		return false;
 	}
 

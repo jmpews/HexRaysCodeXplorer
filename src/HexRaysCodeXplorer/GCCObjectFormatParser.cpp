@@ -43,6 +43,24 @@ void GCCObjectFormatParser::getRttiInfo()
 	qstring buffer;
 	const size_t count = get_entry_qty();
 
+	uint num_import_modules = get_import_module_qty();
+	size_t nlist_size = get_nlist_size();
+	for (size_t i = 0; i < nlist_size; i++) {
+		logmsg(INFO, "%s\n", get_nlist_name(i));
+		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv120__si_class_type_infoE")) {
+			logmsg(INFO, "%s\n", get_nlist_name(i));
+			ea_t ea = get_nlist_ea(i);
+			si_class_type_info_vtbl = ea;
+			set_name(ea, "__cxxabiv1::__si_class_type_info::vtable", SN_NOWARN);
+		}
+		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv117__class_type_infoE")) {
+			logmsg(INFO, "%s\n", get_nlist_name(i));
+			ea_t ea = get_nlist_ea(i);
+			class_type_info_vtbl = ea;
+			set_name(ea, "__cxxabiv1::__class_type_info::vtable", SN_NOWARN);;
+		}
+	}
+
 	// First collect info about __cxxabiv1:: vtables
 	for (int i = 0; i < count; ++i) {
 		uval_t ordinal = get_entry_ordinal(i);
@@ -53,13 +71,13 @@ void GCCObjectFormatParser::getRttiInfo()
 		if (buffer == class_type_info_name)
 		{
 			class_type_info_vtbl = ea;
-			set_name(ea, "__cxxabiv1::__class_type_info::vtable", SN_NOWARN);
+			// set_name(ea, "__cxxabiv1::__class_type_info::vtable", SN_NOWARN);
 		}
 
 		if (buffer == si_class_type_info_name)
 		{
 			si_class_type_info_vtbl = ea;
-			set_name(ea, "__cxxabiv1::__si_class_type_info::vtable", SN_NOWARN);
+			// set_name(ea, "__cxxabiv1::__si_class_type_info::vtable", SN_NOWARN);
 		}
 
 		if (buffer == vmi_class_type_info_name)
@@ -74,6 +92,7 @@ void GCCObjectFormatParser::getRttiInfo()
 	{
 		if (segment_t *seg = getnseg(i))
 		{
+			// logmsg(INFO, "%s\n", seg->name);
 			if (seg->type == SEG_DATA)
 			{
 				scanSeg4Vftables(seg);
@@ -101,26 +120,26 @@ void GCCObjectFormatParser::scanSeg4Vftables(segment_t *seg)
 			//flags_t flags = get_flags_novalue(ea);
 			//if (isData(flags))
 			//{
-				GCCVtableInfo * info = GCCVtableInfo::parseVtableInfo(ptr);
-				if (info)
+			GCCVtableInfo * info = GCCVtableInfo::parseVtableInfo(ptr);
+			if (info)
+			{
+				VTBL_info_t vtbl_info;
+				vtbl_info.ea_begin = info->vtbl_start;
+				vtbl_info.ea_end = info->ea_end;
+				vtbl_info.vtbl_name = info->typeName;
+				vtbl_info.methods = info->vtables[0].methodsCount;
+				rtti_vftables[ptr + offsetof(GCC_RTTI::__vtable_info, origin)] = vtbl_info;
+				ptr = info->ea_end;
+			}
+			else {
+
+				GCCTypeInfo *typeInfo = GCCTypeInfo::parseTypeInfo(ptr);
+				if (typeInfo)
 				{
-					VTBL_info_t vtbl_info;
-					vtbl_info.ea_begin = info->vtbl_start;
-					vtbl_info.ea_end = info->ea_end;
-					vtbl_info.vtbl_name = info->typeName;
-					vtbl_info.methods = info->vtables[0].methodsCount;
-					rtti_vftables[ptr + offsetof(GCC_RTTI::__vtable_info, origin)] = vtbl_info;
-					ptr = info->ea_end;
+					;
 				}
-				else {
 
-					GCCTypeInfo *typeInfo = GCCTypeInfo::parseTypeInfo(ptr);
-					if (typeInfo)
-					{
-						;
-					}
-
-				}
+			}
 			//}
 		}
 	}
