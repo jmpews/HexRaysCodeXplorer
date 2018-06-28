@@ -28,36 +28,52 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     set(GLOBAL.INCLUDE_PATH ${GLOBAL.INCLUDE_PATH} ${GLOBAL.CHECK_PATH})
     set(IDA_IDA_LIBRARY_PATH ${IDA_INSTALL_DIR})
     if(IDA_BINARY_64)
-        set(IDA_PRO_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_mac_gcc_64)
+        set(IDA_PRO_SDK_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_mac_gcc_64)
     else()
-        set(IDA_PRO_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_mac_gcc_32)
+        set(IDA_PRO_SDK_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_mac_gcc_32)
     endif()
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    list(APPEND GLOBAL.CHECK_PATH
+        ${IDA_INSTALL_DIR}/plugins/hexrays_sdk/include
+        ${IDA_SDK_DIR}/include
+    )
+    set(GLOBAL.INCLUDE_PATH ${GLOBAL.INCLUDE_PATH} ${GLOBAL.CHECK_PATH})
+    set(IDA_IDA_LIBRARY_PATH ${IDA_INSTALL_DIR})
+    if(IDA_BINARY_64)
+        set(IDA_PRO_SDK_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_win_vc_64)
+    else()
+        set(IDA_PRO_SDK_LIBRARY_PATH ${IDA_SDK_DIR}/lib/x64_win_vc_32)
+    endif()
+else()
+    error_message("NOT SUPPORT SYSTEM [${CMAKE_SYSTEM_NAME}]")
+    # message(FATAL_ERROR "NOT SUPPORT SYSTEM [${CMAKE_SYSTEM_NAME}]")
 endif()
+
 check_files_exist(${GLOBAL.CHECK_PATH})
 
-# check ida library
-if(IDA_BINARY_64)
-    find_library(IDA_IDA_LIBRARY "ida64" NAMES "ida64" PATHS ${IDA_INSTALL_DIR} REQUIRED)
-else()
-    find_library(IDA_IDA_LIBRARY "ida" NAMES "ida" PATHS ${IDA_INSTALL_DIR} REQUIRED)
-endif()
-if(NOT IDA_IDA_LIBRARY)
-    message(FATAL_ERROR "[!] NOT FOUND [ida] LIBRARY ${IDA_INSTALL_DIR}")
+# check pro static library
+find_library(IDA_LIBRARY_pro NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED)
+if(NOT IDA_LIBRARY_pro)
+    find_file(IDA_LIBRARY_pro_FILE NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
+    if(NOT IDA_LIBRARY_pro_FILE)
+        message(FATAL_ERROR "[!] NOT FOUND [pro] LIBRARY FROM ${IDA_PRO_SDK_LIBRARY_PATH}")
+    else()
+        add_library(IDA_LIBRARY_pro STATIC IMPORTED)
+        SET_TARGET_PROPERTIES(IDA_LIBRARY_pro PROPERTIES IMPORTED_LOCATION ${IDA_LIBRARY_pro_FILE})
+    endif()
 endif()
 
 # check pro static library
-find_library(IDA_PRO_LIBRARY NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_LIBRARY_PATH} REQUIRED)
-if(NOT IDA_PRO_LIBRARY)
-    find_file(IDA_PRO_LIBRARY_FILE NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_LIBRARY_PATH})
-    if(NOT IDA_PRO_LIBRARY_FILE)
-        message(FATAL_ERROR "[!] NOT FOUND [pro] LIBRARY FROM ${IDA_PRO_LIBRARY_PATH}")
+find_library(IDA_LIBRARY_ida NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED)
+if(NOT IDA_LIBRARY_ida)
+    find_file(IDA_LIBRARY_ida_FILE NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
+    if(NOT IDA_LIBRARY_ida_FILE)
+        message(FATAL_ERROR "[!] NOT FOUND [pro] LIBRARY FROM ${IDA_PRO_SDK_LIBRARY_PATH}")
     else()
-        add_library(IDA_PRO_LIBRARY STATIC IMPORTED)
-        SET_TARGET_PROPERTIES(IDA_PRO_LIBRARY PROPERTIES IMPORTED_LOCATION ${IDA_PRO_LIBRARY_FILE})
+        add_library(IDA_LIBRARY_ida STATIC IMPORTED)
+        SET_TARGET_PROPERTIES(IDA_LIBRARY_ida PROPERTIES IMPORTED_LOCATION ${IDA_LIBRARY_ida_FILE})
     endif()
 endif()
-
-
 
 # check ida version
 if (IDA_VERSION LESS 690)
@@ -65,8 +81,8 @@ if (IDA_VERSION LESS 690)
 endif()
 
 # check processor arch
-if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^x86_64")
-    message(FATAL_ERROR "ONLY SUPPORT x86_64!")
+if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^x86_64|AMD64")
+    message(FATAL_ERROR "ONLY SUPPORT x86_64|AMD64!")
 endif()
 
 if(UNIX)
@@ -77,6 +93,7 @@ if(UNIX)
 endif()
 
 # include directory
+message(STATUS ">>> ${GLOBAL.INCLUDE_PATH}")
 include_directories(${GLOBAL.INCLUDE_PATH})
 
 function (add_ida_plugin plugin_name)
@@ -123,5 +140,5 @@ function (add_ida_plugin plugin_name)
         SUFFIX ${plugin_extension}
         OUTPUT_NAME ${plugin_name})
     
-    target_link_libraries(${plugin_name} ${IDA_IDA_LIBRARY} ${IDA_PRO_LIBRARY})
+    target_link_libraries(${plugin_name} ${IDA_LIBRARY_pro} ${IDA_LIBRARY_ida})
 endfunction()
