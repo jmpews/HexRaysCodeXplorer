@@ -64,9 +64,9 @@ if(NOT IDA_LIBRARY_pro)
 endif()
 
 # check pro static library
-find_library(IDA_LIBRARY_ida NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED)
+find_library(IDA_LIBRARY_ida NAMES "ida" "ida64" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED)
 if(NOT IDA_LIBRARY_ida)
-    find_file(IDA_LIBRARY_ida_FILE NAMES "pro.a" "pro.lib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
+    find_file(IDA_LIBRARY_ida_FILE NAMES "ida" "ida64" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
     if(NOT IDA_LIBRARY_ida_FILE)
         message(FATAL_ERROR "[!] NOT FOUND [pro] LIBRARY FROM ${IDA_PRO_SDK_LIBRARY_PATH}")
     else()
@@ -93,8 +93,12 @@ if(UNIX)
 endif()
 
 # include directory
-message(STATUS ">>> ${GLOBAL.INCLUDE_PATH}")
 include_directories(${GLOBAL.INCLUDE_PATH})
+foreach(dir_path ${GLOBAL.INCLUDE_PATH})
+    file(GLOB file_hpp "${dir_path}/*.hpp")
+    file(GLOB file_hpp "${dir_path}/*.h")
+    set(GLOBAL.HEADER_FILE ${GLOBAL.HEADER_FILE} ${file_hpp} ${file_h})
+endforeach()
 
 function (add_ida_plugin plugin_name)
     message(STATUS "\tPlugin Name: ${plugin_name}")
@@ -102,7 +106,7 @@ function (add_ida_plugin plugin_name)
     if (sources)
         list(REMOVE_AT sources 0)
     endif ()
-    add_library(${plugin_name} SHARED ${sources})
+    add_library(${plugin_name} SHARED ${sources} ${GLOBAL.HEADER_FILE})
 
     # Compiler specific properties.
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -115,7 +119,7 @@ function (add_ida_plugin plugin_name)
         "NO_OBSOLETE_FUNCS"
         "__IDP__")
 
-    target_include_directories(${plugin_name} PUBLIC "${IDA_SDK}/include")
+    target_include_directories(${plugin_name} PUBLIC ${GLOBAL.INCLUDE_PATH})
 
     if (IDA_BINARY_64)
         target_compile_definitions(${plugin_name} PUBLIC "__X64__")
