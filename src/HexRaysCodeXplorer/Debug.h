@@ -31,13 +31,13 @@ void logmsg(unsigned int level, const char *fmt, ...);
 #endif
 
 enum DEBUG_LEVELS {
-	OUTPUT, // output printed to output file
-	ERROR, // error printed to error file
-	INFO, // print to IDA
-	INTERACTIVE, // show on IDA interface
-	DEBUG // print to IDA
+    OUTPUT,      // output printed to output file
+    ERROR,       // error printed to error file
+    INFO,        // print to IDA
+    INTERACTIVE, // show on IDA interface
+    DEBUG        // print to IDA
 };
 
-#define CURRENT_DEBUG_LEVEL ERROR
+#define CURRENT_DEBUG_LEVEL DEBUG
 
 #endif

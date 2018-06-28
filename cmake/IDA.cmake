@@ -18,6 +18,8 @@ message(STATUS "\tIDA_BINARY_64: ${IDA_BINARY_64}")
 message(STATUS "\tIDA_SDK_DIR: ${IDA_SDK_DIR}")
 message(STATUS "\tIDA_INSTALL_DIR: ${IDA_INSTALL_DIR}")
 
+
+
 set(GLOBAL.CHECK_PATH "")
 # darwin sdk path, install path check
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
@@ -64,16 +66,18 @@ if(NOT IDA_LIBRARY_pro)
 endif()
 
 # check pro static library
-find_library(IDA_LIBRARY_ida NAMES "ida" "ida64" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED)
+find_library(IDA_LIBRARY_ida NAMES "ida" "ida64" PATHS ${IDA_PRO_SDK_LIBRARY_PATH} REQUIRED NO_DEFAULT_PATH)
 if(NOT IDA_LIBRARY_ida)
-    find_file(IDA_LIBRARY_ida_FILE NAMES "ida" "ida64" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
+    find_file(IDA_LIBRARY_ida_FILE NAMES "ida" "ida64" "libida64.dylib" PATHS ${IDA_PRO_SDK_LIBRARY_PATH})
     if(NOT IDA_LIBRARY_ida_FILE)
         message(FATAL_ERROR "[!] NOT FOUND [pro] LIBRARY FROM ${IDA_PRO_SDK_LIBRARY_PATH}")
     else()
-        add_library(IDA_LIBRARY_ida STATIC IMPORTED)
+        add_library(IDA_LIBRARY_ida SHARED IMPORTED)
         SET_TARGET_PROPERTIES(IDA_LIBRARY_ida PROPERTIES IMPORTED_LOCATION ${IDA_LIBRARY_ida_FILE})
     endif()
 endif()
+
+message(STATUS ">>> ${IDA_LIBRARY_ida}")
 
 # check ida version
 if (IDA_VERSION LESS 690)
@@ -106,6 +110,7 @@ function (add_ida_plugin plugin_name)
     if (sources)
         list(REMOVE_AT sources 0)
     endif ()
+
     add_library(${plugin_name} SHARED ${sources} ${GLOBAL.HEADER_FILE})
 
     # Compiler specific properties.
@@ -127,6 +132,11 @@ function (add_ida_plugin plugin_name)
     else()
         set(plugin_extension "${LIB_EXT}")
     endif()
+
+    if (IDA_EA_64)
+        message(STATUS ">>>>")
+        target_compile_definitions(${plugin_name} PUBLIC "__EA64__")
+    endif ()
     
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         target_compile_definitions(${plugin_name} PUBLIC "__NT__")
