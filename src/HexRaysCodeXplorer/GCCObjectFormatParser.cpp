@@ -47,13 +47,13 @@ void GCCObjectFormatParser::getRttiInfo()
 	size_t nlist_size = get_nlist_size();
 	for (size_t i = 0; i < nlist_size; i++) {
 		logmsg(INFO, "%s\n", get_nlist_name(i));
-		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv120__si_class_type_infoE")) {
+		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv120__si_class_type_infoE") || !strcmp(get_nlist_name(i), "__cxxabiv1::__si_class_type_info::vtable")) {
 			logmsg(INFO, "%s\n", get_nlist_name(i));
 			ea_t ea = get_nlist_ea(i);
 			si_class_type_info_vtbl = ea;
 			set_name(ea, "__cxxabiv1::__si_class_type_info::vtable", SN_NOWARN);
 		}
-		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv117__class_type_infoE")) {
+		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv117__class_type_infoE") || !strcmp(get_nlist_name(i), "__cxxabiv1::__class_type_info::vtable")) {
 			logmsg(INFO, "%s\n", get_nlist_name(i));
 			ea_t ea = get_nlist_ea(i);
 			class_type_info_vtbl = ea;
@@ -88,6 +88,7 @@ void GCCObjectFormatParser::getRttiInfo()
 	}
 	// now we can scan  segments for vtables.
 	int segCount = get_segm_qty();
+	qstring seg_name_buffer;
 	for (int i = 0; i < segCount; i++)
 	{
 		if (segment_t *seg = getnseg(i))
@@ -95,7 +96,9 @@ void GCCObjectFormatParser::getRttiInfo()
 			// logmsg(INFO, "%s\n", seg->name);
 			if (seg->type == SEG_DATA)
 			{
-				scanSeg4Vftables(seg);
+			    get_segm_name(&seg_name_buffer, seg, 0);
+			    if(seg_name_buffer == "__data")
+					scanSeg4Vftables(seg);
 			}
 		}
 	}
@@ -106,7 +109,7 @@ void GCCObjectFormatParser::scanSeg4Vftables(segment_t *seg)
 	UINT found = 0;
 	if (seg->size() >= sizeof(ea_t))
 	{
-		ea_t startEA = ((seg->start_ea + sizeof(ea_t)) & ~((ea_t)(sizeof(ea_t) - 1)));
+		ea_t startEA = ((seg->start_ea + sizeof(ea_t) - 1) & ~((ea_t)(sizeof(ea_t) - 1)));
 		ea_t endEA = (seg->end_ea - sizeof(ea_t));
 
 		for (ea_t ptr = startEA; ptr < endEA; ptr += sizeof(ea_t))

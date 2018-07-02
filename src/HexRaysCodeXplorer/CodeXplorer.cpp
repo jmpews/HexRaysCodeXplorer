@@ -563,7 +563,7 @@ void parse_plugin_options(qstring &options, bool &dump_types, bool &dump_ctrees,
     qstring splitter = ":";
     split_qstring(options, splitter, params);
 
-    dump_types    = false;
+    dump_types    = true;
     dump_ctrees   = false;
     crypto_prefix = "";
 

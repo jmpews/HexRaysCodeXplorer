@@ -7,8 +7,8 @@ cmake_policy(SET CMP0054 NEW)
 
 project(HexRaysCodeXplorer)
 
-SET(CMAKE_C_COMPILER "/usr/local/Cellar/gcc/8.1.0/bin/gcc-8")
-SET(CMAKE_CXX_COMPILER "/usr/local/Cellar/gcc/8.1.0/bin/g++-8")
+#SET(CMAKE_C_COMPILER "/usr/local/Cellar/gcc/8.1.0/bin/gcc-8")
+#SET(CMAKE_CXX_COMPILER "/usr/local/Cellar/gcc/8.1.0/bin/g++-8")
 
 include(cmake/IDA.cmake)
 
@@ -22,6 +22,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11")
 
 set(HexRaysCodeXplorer.path ./src/HexRaysCodeXplorer)
 set(GLOBAL.SOURCE_FILE "")
+
+set(headers
+    "${HexRaysCodeXplorer.path}/apple/rtti.h"
+    "${HexRaysCodeXplorer.path}/apple/typeinfo"
+
+    "${HexRaysCodeXplorer.path}/Common.h"
+    "${HexRaysCodeXplorer.path}/Linux.h"
+    "${HexRaysCodeXplorer.path}/Debug.h"
+    "${HexRaysCodeXplorer.path}/CtreeExtractor.h"
+    "${HexRaysCodeXplorer.path}/GCCObjectFormatParser.h"
+    "${HexRaysCodeXplorer.path}/GCCTypeInfo.h"
+    "${HexRaysCodeXplorer.path}/GCCVtableInfo.h"
+    "${HexRaysCodeXplorer.path}/IObjectFormatParser.h"
+    "${HexRaysCodeXplorer.path}/MSVCObjectFormatParser.h"
+    "${HexRaysCodeXplorer.path}/ObjectExplorer.h"
+    "${HexRaysCodeXplorer.path}/CtreeGraphBuilder.h"
+    "${HexRaysCodeXplorer.path}/TypeReconstructor.h"
+    "${HexRaysCodeXplorer.path}/TypeExtractor.h"
+    "${HexRaysCodeXplorer.path}/Utility.h"
+    )
 
 set(sources
     ${HexRaysCodeXplorer.path}/Debug.cpp
@@ -39,4 +59,4 @@ set(sources
     "${HexRaysCodeXplorer.path}/Utility.cpp"
     )
 
-add_ida_plugin(HexRaysCodeXplorer ${sources})
+add_ida_plugin(HexRaysCodeXplorer ${sources} ${headers})

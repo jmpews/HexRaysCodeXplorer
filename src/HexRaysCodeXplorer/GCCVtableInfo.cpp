@@ -34,7 +34,7 @@ unsigned int findMethodsCount(ea_t addr)
 			{
 				break;
 			}
-			if ((seg->perm & SEGPERM_EXEC) == 0)
+			if (seg->perm && ((seg->perm & SEGPERM_EXEC) == 0))
 			{
 				break;
 			}
