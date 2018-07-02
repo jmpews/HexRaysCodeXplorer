@@ -38,26 +38,6 @@ GCCObjectFormatParser::~GCCObjectFormatParser()
 {
 }
 
-void initializeRttiInfo() {
-	uint num_import_modules = get_import_module_qty();
-	size_t nlist_size = get_nlist_size();
-	for (size_t i = 0; i < nlist_size; i++) {
-		logmsg(INFO, "%s\n", get_nlist_name(i));
-		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv120__si_class_type_infoE") || !strcmp(get_nlist_name(i), "__cxxabiv1::__si_class_type_info::vtable")) {
-			logmsg(INFO, "%s\n", get_nlist_name(i));
-			ea_t ea = get_nlist_ea(i);
-			si_class_type_info_vtbl = ea;
-			// set_name(ea, "__cxxabiv1::__si_class_type_info::vtable", SN_NOWARN);
-		}
-		if (!strcmp(get_nlist_name(i), "__ZTVN10__cxxabiv117__class_type_infoE") || !strcmp(get_nlist_name(i), "__cxxabiv1::__class_type_info::vtable")) {
-			logmsg(INFO, "%s\n", get_nlist_name(i));
-			ea_t ea = get_nlist_ea(i);
-			class_type_info_vtbl = ea;
-			// set_name(ea, "__cxxabiv1::__class_type_info::vtable", SN_NOWARN);;
-		}
-	}
-}
-
 void GCCObjectFormatParser::getRttiInfo()
 {
 	qstring buffer;
@@ -116,36 +96,13 @@ void GCCObjectFormatParser::getRttiInfo()
 			// logmsg(INFO, "%s\n", seg->name);
 			if (seg->type == SEG_DATA)
 			{
-				get_segm_name(&seg_name_buffer, seg, 0);
-				if (seg_name_buffer == "__data")
+			    get_segm_name(&seg_name_buffer, seg, 0);
+			    if(seg_name_buffer == "__data")
 					scanSeg4Vftables(seg);
 			}
 		}
 	}
 }
-
-void search_rtti_list(segment_t *seg) {
-	ea_t startEA = seg->start_ea;
-	ea_t endEA = seg->end_ea;
-
-	std::vector<ea_t> rtti_list;
-	rtti_list.push_back(si_class_type_info_vtbl);
-	rtti_list.push_back(class_type_info_vtbl);
-	rtti_list.push_back(vmi_class_type_info_vtbl);
-
-	for (ea_t ptr = startEA; ptr < endEA; ptr += sizeof(ea_t)) {
-		ea_t tmp;
-		if (!get_bytes(&tmp, sizeof(ea_t), ptr))
-			return;
-		std::vector<ea_t>::iterator iter = std::find(rtti_list.begin(), rtti_list.end(), tmp);
-		if (iter != rtti_list.end()) {
-			rtti_list.push_back(ptr);
-		}
-	}
-
-}
-
-void search_vtable_list();
 
 void GCCObjectFormatParser::scanSeg4Vftables(segment_t *seg)
 {

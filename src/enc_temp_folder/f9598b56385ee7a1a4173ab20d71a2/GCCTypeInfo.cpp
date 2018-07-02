@@ -8,6 +8,9 @@
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #endif
 
+#include "apple/rtti.h"
+
+
 GCCTypeInfo::GCCTypeInfo()
 	: ea(BADADDR)
 	, vtbl(BADADDR)
@@ -34,11 +37,21 @@ GCCTypeInfo *GCCTypeInfo::parseTypeInfo(ea_t ea)
 		return 0;
 
 
-	if (inf.filetype == f_MACHO && inf.is_64bit()) {
-#define _LIBCPP_NONUNIQUE_RTTI_BIT (1ULL << 63)
+	#define _LIBCPP_NONUNIQUE_RTTI_BIT (1ULL << 63)
+
+
+	if(tmp.__type_info_name & _LIBCPP_NONUNIQUE_RTTI_BIT) {
 		tmp.__type_info_name = tmp.__type_info_name & (~_LIBCPP_NONUNIQUE_RTTI_BIT);
-		tmp.__type_info_vtable = tmp.__type_info_vtable - sizeof(GCC_RTTI::type_info);
+		tmp.__type_info_vtable = tmp.__type_info_vtable - 0x10;
 	}
+
+
+//	x__cxxabiv1::__class_type_info *var_class_type_info = (x__cxxabiv1::__class_type_info *)malloc(sizeof(x__cxxabiv1::__class_type_info));
+//
+//	if (!get_bytes(var_class_type_info, sizeof(x__cxxabiv1::__class_type_info), ea))
+//		return 0;
+//
+//	ea_t x_name_ea = (ea_t)var_class_type_info->name();
 
 	ea_t name_ea = tmp.__type_info_name;
 
