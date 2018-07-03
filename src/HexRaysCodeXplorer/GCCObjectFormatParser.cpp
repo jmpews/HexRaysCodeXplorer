@@ -23,6 +23,9 @@ extern std::map<ea_t, VTBL_info_t> rtti_vftables;
 std::map<ea_t, GCCVtableInfo *>g_KnownVtables;
 std::map<ea_t, GCCTypeInfo *>g_KnownTypes;
 
+std::set<ea_t> g_rtti_set;
+std::set<ea_t> g_vtable_set;
+
 ea_t class_type_info_vtbl = -1;
 ea_t si_class_type_info_vtbl = -1;
 ea_t vmi_class_type_info_vtbl = -1;
@@ -124,72 +127,67 @@ void GCCObjectFormatParser::getRttiInfo()
 	}
 }
 
-void search_rtti_list(segment_t *seg) {
+void search_rtti_set(segment_t *seg, std::set<ea_t> *rtti_set) {
 	ea_t startEA = seg->start_ea;
 	ea_t endEA = seg->end_ea;
 
-	std::vector<ea_t> rtti_list;
-	rtti_list.push_back(si_class_type_info_vtbl);
-	rtti_list.push_back(class_type_info_vtbl);
-	rtti_list.push_back(vmi_class_type_info_vtbl);
-
-	for (ea_t ptr = startEA; ptr < endEA; ptr += sizeof(ea_t)) {
+	for (ea_t rtti_ptr = startEA; rtti_ptr < endEA; rtti_ptr += sizeof(ea_t)) {
 		ea_t tmp;
-		if (!get_bytes(&tmp, sizeof(ea_t), ptr))
+		if (!get_bytes(&tmp, sizeof(ea_t), rtti_ptr))
 			return;
-		std::vector<ea_t>::iterator iter = std::find(rtti_list.begin(), rtti_list.end(), tmp);
-		if (iter != rtti_list.end()) {
-			rtti_list.push_back(ptr);
+
+		//std::vector<ea_t>::iterator iter = std::find(rtti_set.begin(), rtti_set.end(), tmp);
+		//if (iter != rtti_set.end()) {
+		//	rtti_set.push_back(ptr);
+		//}
+
+		if (tmp == class_type_info_vtbl || tmp == si_class_type_info_vtbl || tmp == vmi_class_type_info_vtbl) {
+			rtti_set->insert(rtti_ptr);
 		}
 	}
 
 }
 
-void search_vtable_list();
+void search_vtable_set(segment_t *seg, std::set<ea_t> *rtti_set, std::set<ea_t> *vtable_set) {
+	ea_t startEA = seg->start_ea;
+	ea_t endEA = seg->end_ea;
+	for (ea_t vtable_ptr = startEA; vtable_ptr < endEA; vtable_ptr += sizeof(ea_t)) {
+		ea_t tmp;
+		if (!get_bytes(&tmp, sizeof(ea_t), vtable_ptr))
+			return;
+
+		// check vtable entry
+		if (rtti_set->find(tmp) != rtti_set->end()) {
+			vtable_set->insert(vtable_ptr - sizeof(ea_t));
+		}
+	}
+}
 
 void GCCObjectFormatParser::scanSeg4Vftables(segment_t *seg)
 {
-	UINT found = 0;
-	if (seg->size() >= sizeof(ea_t))
-	{
-		ea_t startEA = ((seg->start_ea + sizeof(ea_t) - 1) & ~((ea_t)(sizeof(ea_t) - 1)));
-		ea_t endEA = (seg->end_ea - sizeof(ea_t));
 
-		for (ea_t ptr = startEA; ptr < endEA; ptr += sizeof(ea_t))
+	std::set<ea_t>::iterator it = g_vtable_set.begin();
+	for (it; it != g_vtable_set.end(); it++) {
+		GCCVtableInfo * info = GCCVtableInfo::parseVtableInfo(ptr);
+		if (info)
 		{
-			// Struct of vtable is following:
-			// 0: ptrdiff that tells "Where is the original object according to vtable. This one is 0 of -x;
-			// 1*sizeof(ea_t): ptr to type_info
-			// 2*sizeof(ea_t) ... : the exact functions.
-			// So if we can parse type_info as type_info and we see functions, it should be vtable.
-			//ea_t ea = getEa(ptr);
-			//flags_t flags = get_flags_novalue(ea);
-			//if (isData(flags))
-			//{
-			GCCVtableInfo * info = GCCVtableInfo::parseVtableInfo(ptr);
-			if (info)
+			VTBL_info_t vtbl_info;
+			vtbl_info.ea_begin = info->vtbl_start;
+			vtbl_info.ea_end = info->ea_end;
+			vtbl_info.vtbl_name = info->typeName;
+			vtbl_info.methods = info->vtables[0].methodsCount;
+			rtti_vftables[ptr + offsetof(GCC_RTTI::__vtable_info, origin)] = vtbl_info;
+			ptr = info->ea_end;
+		}
+		else {
+
+			GCCTypeInfo *typeInfo = GCCTypeInfo::parseTypeInfo(ptr);
+			if (typeInfo)
 			{
-				VTBL_info_t vtbl_info;
-				vtbl_info.ea_begin = info->vtbl_start;
-				vtbl_info.ea_end = info->ea_end;
-				vtbl_info.vtbl_name = info->typeName;
-				vtbl_info.methods = info->vtables[0].methodsCount;
-				rtti_vftables[ptr + offsetof(GCC_RTTI::__vtable_info, origin)] = vtbl_info;
-				ptr = info->ea_end;
+				;
 			}
-			else {
-
-				GCCTypeInfo *typeInfo = GCCTypeInfo::parseTypeInfo(ptr);
-				if (typeInfo)
-				{
-					;
-				}
-
-			}
-			//}
 		}
 	}
-
 	return;
 }
 

@@ -3,6 +3,8 @@
 #include "GCCTypeInfo.h"
 #include "Utility.h"
 
+extern std::set<ea_t> g_rtti_set;
+extern std::set<ea_t> g_vtable_set;
 
 
 GCCVtableInfo::GCCVtableInfo()
@@ -25,32 +27,18 @@ unsigned int findMethodsCount(ea_t addr)
 {
 	ea_t func;
 	unsigned int methodsCount = 0;
+
 	while (1) {
 		func = getEa(addr);
-		if (func != 0)
-		{
-			segment_t *seg = getseg(func);
-			if (!seg)
-			{
-				break;
-			}
-			if (seg->perm && ((seg->perm & SEGPERM_EXEC) == 0))
-			{
-				break;
-			}
+		// if still vtable function. (not in rtti_set & vtable_set)
+		if (g_rtti_set.find(addr) == g_rtti_set.end() || g_vtable_set.find(addr) == g_vtable_set.end()) {
+			return methodsCount;
 		}
-		++methodsCount;
-		addr += sizeof(ea_t);
+		else {
+			methodsCount++;
+			addr += sizeof(ea_t);
+		}
 	}
-	// Now lets remove ending zeroes.
-	while (methodsCount) {
-		addr -= sizeof(ea_t);
-		func = getEa(addr);
-		if (func != 0)
-			break;
-		--methodsCount;
-	}
-	return methodsCount;
 }
 
 
@@ -71,7 +59,7 @@ GCCVtableInfo *GCCVtableInfo::parseVtableInfo(ea_t ea)
 	GCCTypeInfo *type = GCCTypeInfo::parseTypeInfo(vtable.type_info);
 	if (type == 0)
 		return nullptr;
-	
+
 	unsigned int methodsCount = 0;
 
 	addr = ea + offsetof(GCC_RTTI::__vtable_info, origin);
@@ -85,7 +73,7 @@ GCCVtableInfo *GCCVtableInfo::parseVtableInfo(ea_t ea)
 	result->vtbl_start = ea + offsetof(GCC_RTTI::__vtable_info, origin);
 	result->typeInfo = type;
 	result->typeName = type->typeName;
-	
+
 	addr += methodsCount * sizeof(ea_t);
 	if (type->parentsCount > 1) {
 		result->vtablesCount = type->parentsCount;
